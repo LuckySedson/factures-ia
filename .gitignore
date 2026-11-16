@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+inbox/*
+processed/*
+doublons/*
+errors/*
+!**/.gitkeep
+*.log
+.n8n/
+pgdata/

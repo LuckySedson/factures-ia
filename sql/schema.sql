@@ -1,5 +1,3 @@
-CREATE DATABASE factures_db ENCODING 'UTF8';
-
 CREATE TABLE fournisseurs (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
@@ -21,14 +19,14 @@ CREATE TABLE documents (
 
 CREATE TABLE factures (
     id SERIAL PRIMARY KEY,
-    document_id INT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    document_id INT NOT NULL UNIQUE REFERENCES documents(id) ON DELETE CASCADE,
     fournisseur_id INT REFERENCES fournisseurs(id) ON DELETE SET NULL,
     numero_facture VARCHAR(100),
     date_facture DATE,
     montant_ht NUMERIC(12, 2),
     tva NUMERIC(12, 2),
     montant_ttc NUMERIC(12, 2),
-    devise CHAR(3) DEFAULT 'EUR',
+    devise CHAR(3) DEFAULT 'MGA',
     statut VARCHAR(30) NOT NULL DEFAULT 'en_attente'
         CHECK (statut IN (
             'en_attente', 'a_verifier', 'doublon_suspect',
@@ -94,3 +92,5 @@ CREATE TABLE mesures_temps_manuel (
     duree_secondes INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE factures ADD CONSTRAINT uq_facture_document UNIQUE (document_id);

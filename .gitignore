@@ -1,11 +1,58 @@
+
+# Variables d'environnement et secrets
 .env
+.env.*
+
+!.env.example
+
+# Environnements virtuels Python
 .venv/
+.venv*/
+venv/
+env/
+
+# Python
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Fichiers de logs
+*.log
+
+# Dossiers de traitement des factures
 inbox/*
 processed/*
 doublons/*
 errors/*
-!**/.gitkeep
-*.log
+
+# Conserver les dossiers avec .gitkeep
+!inbox/.gitkeep
+!processed/.gitkeep
+!doublons/.gitkeep
+!errors/.gitkeep
+
+# Stockage local
+storage/*
+!storage/.gitkeep
+
+# n8n et Docker
 .n8n/
 pgdata/
+
+# IDE
+.vscode/
+.idea/
+
+# Cache et tests
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary

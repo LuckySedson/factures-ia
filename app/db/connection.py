@@ -23,6 +23,7 @@ class Database:
             min_size=min_size,
             max_size=max_size,
             kwargs={"row_factory": dict_row},
+            check=ConnectionPool.check_connection,
             open=False,
         )
 
@@ -33,13 +34,13 @@ class Database:
         self._pool.close()
 
     @contextmanager
-    def connection(self) -> Iterator[Connection]:
-        with self._pool.connection() as conn:
+    def connection(self, timeout: float = 10.0) -> Iterator[Connection]:
+        with self._pool.connection(timeout=timeout) as conn:
             yield conn
 
     def ping(self) -> bool:
         try:
-            with self.connection() as conn:
+            with self.connection(timeout=3.0) as conn:
                 conn.execute("SELECT 1")
             return True
         except Exception:

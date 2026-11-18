@@ -6,16 +6,16 @@ services:
     container_name: factures-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${FACTURES_POSTGRES_DB}
+      POSTGRES_USER: ${FACTURES_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${FACTURES_POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${FACTURES_POSTGRES_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql
       - ./sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${FACTURES_POSTGRES_USER} -d ${FACTURES_POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10

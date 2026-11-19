@@ -49,8 +49,12 @@ class StorageService:
             size=len(content),
         )
 
+    @staticmethod
+    def relative_path(info: InspectedFile) -> str:
+        return f"{info.sha256}.{info.extension}"
+
     def save(self, content: bytes, info: InspectedFile) -> str:
-        relative = f"{info.sha256}.{info.extension}"
+        relative = self.relative_path(info)
         target = self._root / relative
         self._root.mkdir(parents=True, exist_ok=True)
         temp = target.with_name(target.name + ".tmp")

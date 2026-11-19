@@ -76,3 +76,18 @@ def test_log_without_facture(conn):
         "RECEPTION", "erreur", details="doublon exact du document 1"
     )
     assert log_id > 0
+
+def test_create_if_new_returns_document(conn):
+    doc = DocumentRepository(conn).create_if_new(
+        "f.pdf", f"{'d' * 64}.pdf", "pdf_texte", "d" * 64
+    )
+    assert doc is not None
+    assert doc.hash_sha256 == "d" * 64
+
+
+def test_create_if_new_returns_none_on_duplicate(conn):
+    repo = DocumentRepository(conn)
+    first = repo.create_if_new("f.pdf", f"{HASH_A}.pdf", "pdf_texte", HASH_A)
+    second = repo.create_if_new("g.pdf", f"{HASH_A}.pdf", "pdf_texte", HASH_A)
+    assert first is not None
+    assert second is None

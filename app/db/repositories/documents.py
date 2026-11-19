@@ -23,6 +23,22 @@ class DocumentRepository:
             (nom_fichier_original, chemin_stockage, type_document, hash_sha256, texte_ocr),
         )
 
+    def create_if_new(
+            self,
+            nom_fichier_original: str,
+            chemin_stockage: str,
+            type_document: str,
+            hash_sha256: str,
+            texte_ocr: str | None = None,
+        ) -> Document | None:
+            return self._fetch_one(
+                "INSERT INTO documents "
+                "(nom_fichier_original, chemin_stockage, type_document, hash_sha256, texte_ocr) "
+                "VALUES (%s, %s, %s, %s, %s) "
+                "ON CONFLICT (hash_sha256) DO NOTHING RETURNING *",
+                (nom_fichier_original, chemin_stockage, type_document, hash_sha256, texte_ocr),
+            )
+
     def get_by_id(self, document_id: int) -> Document | None:
         return self._fetch_one(
             "SELECT * FROM documents WHERE id = %s", (document_id,)

@@ -23,3 +23,8 @@ Installation :
 # ollama ps
 # Telecharger Tesseract OCR (UB-Mannheim Tesseract sur GitHub)
 # pip install fastapi uvicorn[standard] python-multipart pydantic-settings psycopg[binary,pool] docling pytesseract httpx streamlit pandas pytest reportlab Pillow Faker
+
+Demarrage serveur :
+# docker compose start
+# docker compose ps
+# uvicorn app.main:app --reload --reload-dir app --port 8000

@@ -2,9 +2,11 @@ import time
 from dataclasses import dataclass
 
 from app.db.connection import Database
+from app.db.models import Document, Facture
 from app.db.repositories.documents import DocumentRepository
 from app.db.repositories.factures import FactureRepository
 from app.db.repositories.logs import LogRepository
+from app.services.errors import DocumentNotFoundError
 from app.services.storage import InspectedFile, StorageService
 
 STATUT_RECU = "recu"
@@ -19,6 +21,12 @@ class ReceptionResult:
     type_document: str
     sha256: str
     nom_fichier: str
+
+
+@dataclass(frozen=True)
+class DocumentDetail:
+    document: Document
+    facture: Facture | None
 
 
 class DocumentService:
@@ -61,6 +69,14 @@ class DocumentService:
                 sha256=info.sha256,
                 nom_fichier=info.nom_original,
             )
+
+    def get_detail(self, document_id: int) -> DocumentDetail:
+        with self._db.connection() as conn:
+            document = DocumentRepository(conn).get_by_id(document_id)
+            if document is None:
+                raise DocumentNotFoundError(f"Document {document_id} introuvable")
+            facture = FactureRepository(conn).get_by_document_id(document_id)
+        return DocumentDetail(document=document, facture=facture)
 
     def _duplicate(
         self,

@@ -6,7 +6,7 @@ from psycopg.conninfo import make_conninfo
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 
-from app.config import Settings, get_settings
+from app.config import Settings
 
 
 class Database:
@@ -45,18 +45,3 @@ class Database:
             return True
         except Exception:
             return False
-
-
-if __name__ == "__main__":
-    db = Database(get_settings())
-    db.open()
-    with db.connection() as conn:
-        version = conn.execute("SELECT version() AS v").fetchone()["v"]
-        nb_tables = conn.execute(
-            "SELECT count(*) AS n FROM information_schema.tables "
-            "WHERE table_schema = 'public'"
-        ).fetchone()["n"]
-    print(version)
-    print(f"Tables publiques : {nb_tables}")
-    print(f"ping : {db.ping()}")
-    db.close()

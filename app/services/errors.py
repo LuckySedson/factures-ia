@@ -8,3 +8,6 @@ class UnsupportedFileTypeError(ReceptionError):
 
 class FileTooLargeError(ReceptionError):
     pass
+
+class DocumentNotFoundError(Exception):
+    pass

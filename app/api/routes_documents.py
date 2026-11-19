@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 
 from app.api.dependencies import get_document_service
-from app.api.schemas import ReceptionResponse
+from app.api.schemas import DocumentResponse, FactureSummary, ReceptionResponse
 from app.config import Settings, get_settings
 from app.services.documents import STATUT_RECU, DocumentService
-from app.services.errors import FileTooLargeError, UnsupportedFileTypeError
+from app.services.errors import (
+    DocumentNotFoundError,
+    FileTooLargeError,
+    UnsupportedFileTypeError,
+)
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -27,3 +31,26 @@ def receive_document(
     if result.statut == STATUT_RECU:
         response.status_code = status.HTTP_201_CREATED
     return ReceptionResponse.model_validate(result)
+
+
+@router.get("/{document_id}", response_model=DocumentResponse)
+def get_document(
+    document_id: int,
+    service: DocumentService = Depends(get_document_service),
+) -> DocumentResponse:
+    try:
+        detail = service.get_detail(document_id)
+    except DocumentNotFoundError as exc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
+
+    document = detail.document
+    return DocumentResponse(
+        id=document.id,
+        nom_fichier_original=document.nom_fichier_original,
+        type_document=document.type_document,
+        hash_sha256=document.hash_sha256,
+        created_at=document.created_at,
+        facture=(
+            FactureSummary.model_validate(detail.facture) if detail.facture else None
+        ),
+    )

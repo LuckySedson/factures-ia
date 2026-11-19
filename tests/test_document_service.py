@@ -1,5 +1,4 @@
 import uuid
-from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -15,20 +14,10 @@ JPG_FILE = (
     Path(__file__).resolve().parent.parent / "data" / "tests" / "facture_scan_002.jpg"
 )
 
-
-class SingleConnectionDb:
-    def __init__(self, conn):
-        self._conn = conn
-
-    @contextmanager
-    def connection(self, timeout=10.0):
-        yield self._conn
-
-
 @pytest.fixture
-def service(conn, tmp_path):
+def service(fake_db, tmp_path):
     storage = StorageService(tmp_path, max_bytes=5 * 1024 * 1024)
-    return DocumentService(SingleConnectionDb(conn), storage)
+    return DocumentService(fake_db, storage)
 
 
 def unique_image() -> bytes:

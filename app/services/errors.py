@@ -11,3 +11,6 @@ class FileTooLargeError(ReceptionError):
 
 class DocumentNotFoundError(Exception):
     pass
+
+class OcrError(Exception):
+    pass

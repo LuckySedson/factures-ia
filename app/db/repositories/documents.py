@@ -49,6 +49,12 @@ class DocumentRepository:
             "SELECT * FROM documents WHERE hash_sha256 = %s", (hash_sha256,)
         )
 
+    def update_texte_ocr(self, document_id: int, texte_ocr: str) -> Document | None:
+        return self._fetch_one(
+            "UPDATE documents SET texte_ocr = %s WHERE id = %s RETURNING *",
+            (texte_ocr, document_id),
+        )
+
     def _fetch_one(self, query: str, params: tuple) -> Document | None:
         with self._conn.cursor(row_factory=class_row(Document)) as cur:
             cur.execute(query, params)

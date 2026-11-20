@@ -65,6 +65,9 @@ class StorageService:
     def delete(self, relative_path: str) -> None:
         (self._root / relative_path).unlink(missing_ok=True)
 
+    def absolute_path(self, relative_path: str) -> Path:
+        return self._root / relative_path
+
     @staticmethod
     def _detect_extension(content: bytes) -> str:
         for signature, extension in SIGNATURES:

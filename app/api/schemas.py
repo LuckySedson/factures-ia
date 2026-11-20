@@ -37,3 +37,14 @@ class DocumentResponse(BaseModel):
     hash_sha256: str
     created_at: datetime
     facture: FactureSummary | None
+
+class OcrResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    document_id: int
+    facture_id: int | None
+    engine: str | None
+    duration_ms: int | None
+    nb_caracteres: int
+    apercu: str
+    deja_realise: bool

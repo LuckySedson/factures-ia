@@ -4,10 +4,11 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.dependencies import get_document_service
+from app.api.dependencies import get_document_service, get_ocr_service
 from app.config import Settings, get_settings
 from app.main import app
 from app.services.documents import DocumentService
+from app.services.ocr_service import OcrService
 from app.services.storage import StorageService
 
 JPG_FILE = (
@@ -17,10 +18,14 @@ MAX_MB = 1
 
 
 @pytest.fixture
-def client(fake_db, tmp_path):
+def client(fake_db, tmp_path, fake_engine):
     storage = StorageService(tmp_path, max_bytes=MAX_MB * 1024 * 1024)
-    service = DocumentService(fake_db, storage)
-    app.dependency_overrides[get_document_service] = lambda: service
+    app.dependency_overrides[get_document_service] = lambda: DocumentService(
+        fake_db, storage
+    )
+    app.dependency_overrides[get_ocr_service] = lambda: OcrService(
+        fake_db, storage, fake_engine
+    )
     app.dependency_overrides[get_settings] = lambda: Settings(max_upload_mb=MAX_MB)
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -95,3 +100,35 @@ def test_health_with_real_database():
         response = real_client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"api": "ok", "database": "ok"}
+
+def test_ocr_route_extracts_text(client, fake_engine):
+    created = post_file(client, unique_image()).json()
+    response = client.post(f"/documents/{created['document_id']}/ocr")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["engine"] == "fake"
+    assert body["nb_caracteres"] == len(fake_engine.text)
+    assert body["deja_realise"] is False
+
+
+def test_ocr_route_is_idempotent(client, fake_engine):
+    created = post_file(client, unique_image()).json()
+    url = f"/documents/{created['document_id']}/ocr"
+    client.post(url)
+    second = client.post(url)
+    assert second.json()["deja_realise"] is True
+    assert fake_engine.calls == 1
+    forced = client.post(url, params={"force": "true"})
+    assert forced.json()["deja_realise"] is False
+    assert fake_engine.calls == 2
+
+
+def test_ocr_route_unknown_document_returns_404(client):
+    assert client.post("/documents/999999999/ocr").status_code == 404
+
+
+def test_ocr_route_empty_text_returns_422(client, fake_engine):
+    fake_engine.text = "   "
+    created = post_file(client, unique_image()).json()
+    response = client.post(f"/documents/{created['document_id']}/ocr")
+    assert response.status_code == 422

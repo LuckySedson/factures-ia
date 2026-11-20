@@ -58,8 +58,8 @@ Streamlit : consultation, correction et validation
 - [x] Configuration, connexion PostgreSQL, route `/health`
 - [x] Réception des documents (`POST /documents`), hash SHA-256, doublon exact, stockage
 - [x] Relecture d'un document (`GET /documents/{id}`)
-- [ ] Workflow n8n (dossier surveillé)
-- [ ] OCR (Docling, Tesseract en repli)
+- [x] Workflow n8n (dossier surveillé)
+- [x] OCR (Docling)
 - [ ] Extraction des champs (règles, LLM)
 - [ ] Contrôles métier et doublons métier
 - [ ] Interface Streamlit
@@ -99,6 +99,21 @@ uvicorn app.main:app --reload --reload-dir app --port 8000
 
 - Documentation interactive : http://127.0.0.1:8000/docs
 - État de santé : http://127.0.0.1:8000/health
+
+## Workflow n8n
+
+n8n est lancé par `docker compose up -d` : http://localhost:5678 (créer un compte propriétaire local au premier lancement).
+
+1. Importer `n8n/workflow_factures.json` (menu « ⋯ » d'un workflow, Import from File).
+2. L'API doit tourner (`uvicorn app.main:app --reload --reload-dir app --port 8000`).
+3. Activer le workflow, puis déposer un PDF ou une image dans `inbox/`.
+
+Notes de configuration :
+
+- Le nœud Local File Trigger utilise le **polling** : sous Windows, les notifications de fichiers ne traversent pas toujours le dossier partagé avec Docker.
+- n8n 2.x désactive par défaut le nœud Local File Trigger : `NODES_EXCLUDE: "[]"` dans `docker-compose.yml` le réactive.
+- La concurrence est limitée à 1 (`N8N_CONCURRENCY_PRODUCTION_LIMIT`) : l'OCR traite un document à la fois.
+- n8n joint l'API à l'adresse `host.docker.internal:8000`.
 
 ## Tests
 

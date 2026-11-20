@@ -34,6 +34,7 @@ services:
       TZ: ${TZ}
       NODES_EXCLUDE: "[]"
       N8N_RESTRICT_FILE_ACCESS_TO: /data
+      N8N_CONCURRENCY_PRODUCTION_LIMIT: "1"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

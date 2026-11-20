@@ -146,17 +146,6 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1344,
-        -96
-      ],
-      "id": "fbe1ae3e-1264-4706-9bfa-ffd070b13d36",
-      "name": "Texte OCR pret"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
         896,
         96
       ],
@@ -173,6 +162,46 @@
       ],
       "id": "2a3c3e36-f682-4518-a34d-12a4682dad8f",
       "name": "Erreur OCR"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:8000/documents/{{ $json.document_id }}/extract",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1344,
+        -64
+      ],
+      "id": "f37f4f82-2347-462f-b639-cc42348da3e7",
+      "name": "Extraction champs",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        -96
+      ],
+      "id": "fbe1ae3e-1264-4706-9bfa-ffd070b13d36",
+      "name": "Champs extraits"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        64
+      ],
+      "id": "e5b82152-92e1-4732-98c3-412ec4207718",
+      "name": "Erreur extraction"
     }
   ],
   "pinData": {},
@@ -250,7 +279,7 @@
       "main": [
         [
           {
-            "node": "Texte OCR pret",
+            "node": "Extraction champs",
             "type": "main",
             "index": 0
           }
@@ -263,6 +292,24 @@
           }
         ]
       ]
+    },
+    "Extraction champs": {
+      "main": [
+        [
+          {
+            "node": "Champs extraits",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erreur extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -270,7 +317,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "b8d13ee4-660e-4fb5-a3cd-1beb20909610",
+  "versionId": "a41ef98b-4cbd-4896-a2e6-8914b723cae5",
   "meta": {
     "instanceId": "8db10219a8f30c4702b40f6cfa1165459c0fcd9738c967964cbf1fe1d57d9ab1"
   },

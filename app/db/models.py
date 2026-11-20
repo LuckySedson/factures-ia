@@ -41,3 +41,13 @@ class ProcessingLog:
     statut_execution: str
     details: str | None
     created_at: datetime
+
+@dataclass(frozen=True)
+class ChampExtrait:
+    id: int
+    facture_id: int
+    nom_champ: str
+    valeur_extraite: str | None
+    valeur_corrigee: str | None
+    confiance: float | None
+    methode: str

@@ -48,3 +48,18 @@ class OcrResponse(BaseModel):
     nb_caracteres: int
     apercu: str
     deja_realise: bool
+
+class ChampResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    valeur: str | None
+    confiance: float
+    methode: str
+
+
+class ExtractionResponse(BaseModel):
+    document_id: int
+    facture_id: int
+    champs: dict[str, ChampResponse]
+    score_global: float
+    deja_realise: bool

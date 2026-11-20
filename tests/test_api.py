@@ -4,12 +4,19 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.dependencies import get_document_service, get_ocr_service
+from app.api.dependencies import (
+    get_document_service,
+    get_extraction_service,
+    get_ocr_service,
+)
 from app.config import Settings, get_settings
 from app.main import app
 from app.services.documents import DocumentService
 from app.services.ocr_service import OcrService
 from app.services.storage import StorageService
+from app.services.extraction.pipeline import ExtractionPipeline
+from app.services.extraction.regex_extractor import RegexExtractor
+from app.services.extraction_service import ExtractionService
 
 JPG_FILE = (
     Path(__file__).resolve().parent.parent / "data" / "tests" / "facture_scan_002.jpg"
@@ -25,6 +32,9 @@ def client(fake_db, tmp_path, fake_engine):
     )
     app.dependency_overrides[get_ocr_service] = lambda: OcrService(
         fake_db, storage, fake_engine
+    )
+    app.dependency_overrides[get_extraction_service] = lambda: ExtractionService(
+        fake_db, ExtractionPipeline(RegexExtractor())
     )
     app.dependency_overrides[get_settings] = lambda: Settings(max_upload_mb=MAX_MB)
     yield TestClient(app)
@@ -132,3 +142,25 @@ def test_ocr_route_empty_text_returns_422(client, fake_engine):
     created = post_file(client, unique_image()).json()
     response = client.post(f"/documents/{created['document_id']}/ocr")
     assert response.status_code == 422
+
+def test_extract_route_returns_fields(client, fake_engine, sample_pdf_text):
+    fake_engine.text = sample_pdf_text
+    document_id = post_file(client, unique_image()).json()["document_id"]
+    client.post(f"/documents/{document_id}/ocr")
+
+    response = client.post(f"/documents/{document_id}/extract")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["champs"]["numero_facture"]["valeur"] == "FAC-2026-001"
+    assert body["champs"]["montant_ttc"]["valeur"] == "4380000.00"
+    assert body["score_global"] == 0.9
+    assert body["deja_realise"] is False
+
+
+def test_extract_route_without_ocr_returns_409(client):
+    document_id = post_file(client, unique_image()).json()["document_id"]
+    assert client.post(f"/documents/{document_id}/extract").status_code == 409
+
+
+def test_extract_route_unknown_document_returns_404(client):
+    assert client.post("/documents/999999999/extract").status_code == 404

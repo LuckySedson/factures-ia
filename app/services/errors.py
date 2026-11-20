@@ -14,3 +14,6 @@ class DocumentNotFoundError(Exception):
 
 class OcrError(Exception):
     pass
+
+class OcrRequiredError(Exception):
+    pass

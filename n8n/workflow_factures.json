@@ -168,7 +168,7 @@
         "method": "POST",
         "url": "=http://host.docker.internal:8000/documents/{{ $json.document_id }}/extract",
         "options": {
-          "timeout": 60000
+          "timeout": 300000
         }
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -317,7 +317,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "a41ef98b-4cbd-4896-a2e6-8914b723cae5",
+  "versionId": "d238c559-6044-4679-88e1-08f9878c1ace",
   "meta": {
     "instanceId": "8db10219a8f30c4702b40f6cfa1165459c0fcd9738c967964cbf1fe1d57d9ab1"
   },

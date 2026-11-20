@@ -60,7 +60,7 @@ Streamlit : consultation, correction et validation
 - [x] Relecture d'un document (`GET /documents/{id}`)
 - [x] Workflow n8n (dossier surveillé)
 - [x] OCR (Docling)
-- [ ] Extraction des champs (règles, LLM)
+- [x] Extraction des champs (règles, repli LLM Ollama)
 - [ ] Contrôles métier et doublons métier
 - [ ] Interface Streamlit
 - [ ] Évaluation (précision par champ, doublons, temps manuel contre automatisé)

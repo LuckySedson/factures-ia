@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     postgres_port: int = 5434
     storage_dir: str = "storage"
     max_upload_mb: int = 20
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2:3b"
+    ollama_timeout_s: float = 180.0
+    llm_enabled: bool = True
 
     @property
     def storage_path(self) -> Path:

@@ -8,6 +8,7 @@ from app.api.routes_health import router as health_router
 from app.api.routes_ocr import router as ocr_router
 from app.config import get_settings
 from app.db.connection import Database
+from app.services.extraction.llm_extractor import LlmExtractor
 from app.services.extraction.pipeline import ExtractionPipeline
 from app.services.extraction.regex_extractor import RegexExtractor
 from app.services.ocr.docling_engine import DoclingEngine
@@ -21,7 +22,18 @@ async def lifespan(app: FastAPI):
     db.open()
     app.state.db = db
     app.state.ocr_engine = DoclingEngine()
-    app.state.extraction_pipeline = ExtractionPipeline(RegexExtractor())
+
+    fallbacks = []
+    if settings.llm_enabled:
+        fallbacks.append(
+            LlmExtractor(
+                settings.ollama_base_url,
+                settings.ollama_model,
+                settings.ollama_timeout_s,
+            )
+        )
+    app.state.extraction_pipeline = ExtractionPipeline(RegexExtractor(), fallbacks)
+
     yield
     db.close()
 

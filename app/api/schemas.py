@@ -63,3 +63,18 @@ class ExtractionResponse(BaseModel):
     champs: dict[str, ChampResponse]
     score_global: float
     deja_realise: bool
+
+class AnomalyResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    type_anomalie: str
+    details: str
+    facture_liee_id: int | None
+
+
+class ControlResponse(BaseModel):
+    document_id: int
+    facture_id: int
+    statut: str
+    score_global: float | None
+    anomalies: list[AnomalyResponse]

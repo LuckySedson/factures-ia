@@ -1,5 +1,10 @@
 from fastapi import Depends, Request
 
+from decimal import Decimal
+
+from app.services.control_service import ControlService
+from app.services.controls import InvoiceChecker
+
 from app.config import Settings, get_settings
 from app.db.connection import Database
 from app.services.documents import DocumentService
@@ -46,3 +51,12 @@ def get_extraction_service(
     pipeline: ExtractionPipeline = Depends(get_extraction_pipeline),
 ) -> ExtractionService:
     return ExtractionService(db, pipeline)
+
+def get_control_service(
+    db: Database = Depends(get_db),
+    settings: Settings = Depends(get_settings),
+) -> ControlService:
+    checker = InvoiceChecker(
+        settings.validation_threshold, Decimal(str(settings.amount_tolerance))
+    )
+    return ControlService(db, checker)

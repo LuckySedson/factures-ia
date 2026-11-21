@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.api.dependencies import (
+    get_control_service,
     get_document_service,
     get_extraction_service,
     get_ocr_service,
@@ -17,6 +18,7 @@ from app.services.storage import StorageService
 from app.services.extraction.pipeline import ExtractionPipeline
 from app.services.extraction.regex_extractor import RegexExtractor
 from app.services.extraction_service import ExtractionService
+from app.services.control_service import ControlService
 
 JPG_FILE = (
     Path(__file__).resolve().parent.parent / "data" / "tests" / "facture_scan_002.jpg"
@@ -36,6 +38,7 @@ def client(fake_db, tmp_path, fake_engine):
     app.dependency_overrides[get_extraction_service] = lambda: ExtractionService(
         fake_db, ExtractionPipeline(RegexExtractor())
     )
+    app.dependency_overrides[get_control_service] = lambda: ControlService(fake_db)
     app.dependency_overrides[get_settings] = lambda: Settings(max_upload_mb=MAX_MB)
     yield TestClient(app)
     app.dependency_overrides.clear()
@@ -164,3 +167,24 @@ def test_extract_route_without_ocr_returns_409(client):
 
 def test_extract_route_unknown_document_returns_404(client):
     assert client.post("/documents/999999999/extract").status_code == 404
+
+def test_controls_route_auto_validates_clean_invoice(client, fake_engine, sample_pdf_text):
+    fake_engine.text = sample_pdf_text
+    document_id = post_file(client, unique_image()).json()["document_id"]
+    client.post(f"/documents/{document_id}/ocr")
+    client.post(f"/documents/{document_id}/extract")
+
+    response = client.post(f"/documents/{document_id}/controls")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["statut"] == "validee_auto"
+    assert body["anomalies"] == []
+
+
+def test_controls_route_without_extraction_returns_409(client):
+    document_id = post_file(client, unique_image()).json()["document_id"]
+    assert client.post(f"/documents/{document_id}/controls").status_code == 409
+
+
+def test_controls_route_unknown_document_returns_404(client):
+    assert client.post("/documents/999999999/controls").status_code == 404

@@ -51,3 +51,13 @@ class ChampExtrait:
     valeur_corrigee: str | None
     confiance: float | None
     methode: str
+
+@dataclass(frozen=True)
+class Anomalie:
+    id: int
+    facture_id: int
+    type_anomalie: str
+    details: str | None
+    facture_liee_id: int | None
+    resolue: bool
+    created_at: datetime

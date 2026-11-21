@@ -17,3 +17,10 @@ class OcrError(Exception):
 
 class OcrRequiredError(Exception):
     pass
+
+class ExtractionRequiredError(Exception):
+    pass
+
+
+class FactureLockedError(Exception):
+    pass

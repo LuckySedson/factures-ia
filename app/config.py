@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.2:3b"
     ollama_timeout_s: float = 180.0
     llm_enabled: bool = True
+    validation_threshold: float = 0.8
+    amount_tolerance: float = 1.0
 
     @property
     def storage_path(self) -> Path:

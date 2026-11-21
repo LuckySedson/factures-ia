@@ -186,22 +186,158 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1616,
+        1648,
+        144
+      ],
+      "id": "e5b82152-92e1-4732-98c3-412ec4207718",
+      "name": "Erreur extraction"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:8000/documents/{{ $json.document_id }}/controls",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1584,
         -96
       ],
-      "id": "fbe1ae3e-1264-4706-9bfa-ffd070b13d36",
-      "name": "Champs extraits"
+      "id": "cb9113a2-8643-499b-9b3b-bbf74c6dc13a",
+      "name": "Controles metier",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {},
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1616,
-        64
+        1808,
+        0
       ],
-      "id": "e5b82152-92e1-4732-98c3-412ec4207718",
-      "name": "Erreur extraction"
+      "id": "2ac1e647-16bf-431c-ac4c-9b8c97990e0d",
+      "name": "Erreur controles"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.statut }}",
+                    "rightValue": "validee_auto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "33c8fbfa-cbca-473f-ba04-7ba60046afa4"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "d5f8b163-760a-4402-81c1-e98d678ebe2a",
+                    "leftValue": "={{ $json.statut }}",
+                    "rightValue": "a_verifier",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 4
+                },
+                "conditions": [
+                  {
+                    "id": "b881438b-56a6-4b7a-ab13-8da30ad7405f",
+                    "leftValue": "={{ $json.statut }}",
+                    "rightValue": "doublon_suspect",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.5,
+      "position": [
+        1808,
+        -192
+      ],
+      "id": "643f2282-04ea-4ab4-9412-48b55583cfc1",
+      "name": "Statut ?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        -320
+      ],
+      "id": "feda851a-c654-47c3-8f54-32b0554344b1",
+      "name": "Validee auto"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        -192
+      ],
+      "id": "aa9a725a-285c-4ac4-9848-7da0dff131b4",
+      "name": "a_verifier"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        -32
+      ],
+      "id": "4bff3743-5592-40a2-8dc3-5781c841e487",
+      "name": "doublon_suspect"
     }
   ],
   "pinData": {},
@@ -297,7 +433,7 @@
       "main": [
         [
           {
-            "node": "Champs extraits",
+            "node": "Controles metier",
             "type": "main",
             "index": 0
           }
@@ -310,6 +446,49 @@
           }
         ]
       ]
+    },
+    "Controles metier": {
+      "main": [
+        [
+          {
+            "node": "Statut ?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erreur controles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Statut ?": {
+      "main": [
+        [
+          {
+            "node": "Validee auto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "a_verifier",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "doublon_suspect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -317,7 +496,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "d238c559-6044-4679-88e1-08f9878c1ace",
+  "versionId": "0ccfff59-fe5e-4e38-85e6-5b92499d5368",
   "meta": {
     "instanceId": "8db10219a8f30c4702b40f6cfa1165459c0fcd9738c967964cbf1fe1d57d9ab1"
   },

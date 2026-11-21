@@ -31,3 +31,11 @@ class LogRepository:
                 (facture_id,),
             )
             return cur.fetchall()
+
+    def total_time_ms(self, facture_id: int) -> int:
+        row = self._conn.execute(
+            "SELECT COALESCE(SUM(temps_execution_ms), 0) AS total "
+            "FROM logs_traitement WHERE facture_id = %s",
+            (facture_id,),
+        ).fetchone()
+        return int(row["total"])

@@ -53,6 +53,49 @@ class FactureRepository:
             ),
         )
 
+    def find_same_number(
+        self, facture_id: int, fournisseur_id: int, numero_facture: str
+    ) -> Facture | None:
+        return self._fetch_one(
+            "SELECT * FROM factures "
+            "WHERE id <> %s AND fournisseur_id = %s "
+            "AND upper(btrim(numero_facture)) = upper(btrim(%s)) "
+            "AND statut <> 'rejetee' "
+            "AND (id < %s OR statut IN ('validee_auto', 'validee_manuelle')) "
+            "ORDER BY id LIMIT 1",
+            (facture_id, fournisseur_id, numero_facture, facture_id),
+        )
+
+    def find_same_amount_and_date(
+        self,
+        facture_id: int,
+        fournisseur_id: int,
+        montant_ttc: Decimal,
+        date_facture: date,
+    ) -> Facture | None:
+        return self._fetch_one(
+            "SELECT * FROM factures "
+            "WHERE id < %s AND fournisseur_id = %s AND montant_ttc = %s "
+            "AND date_facture = %s AND statut <> 'rejetee' "
+            "ORDER BY id LIMIT 1",
+            (facture_id, fournisseur_id, montant_ttc, date_facture),
+        )
+
+    def update_status(self, facture_id: int, statut: str) -> Facture | None:
+        return self._fetch_one(
+            "UPDATE factures SET statut = %s, "
+            "validated_at = CASE WHEN %s::text = 'validee_auto' "
+            "THEN CURRENT_TIMESTAMP ELSE NULL END "
+            "WHERE id = %s RETURNING *",
+            (statut, statut, facture_id),
+        )
+
+    def set_duration(self, facture_id: int, duree_ms: int) -> None:
+        self._conn.execute(
+            "UPDATE factures SET duree_traitement_ms = %s WHERE id = %s",
+            (duree_ms, facture_id),
+        )
+
     def _fetch_one(self, query: str, params: tuple) -> Facture | None:
         with self._conn.cursor(row_factory=class_row(Facture)) as cur:
             cur.execute(query, params)
